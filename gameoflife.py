@@ -4,7 +4,7 @@ from random import randrange
 from matplotlib import pyplot as plot
 from matplotlib import animation
 
-width, height = 800, 400
+width, height = 1280, 720
 dotres = 20
 
 col = int(width/dotres)
@@ -17,15 +17,17 @@ def defineArray(row, col):
             array[x][y] = randrange(0,2)
     return array
 
+global ogScene
+ogScene = defineArray(row, col)
+
 def neighbourCellCounter(array, xo, yo):
     # xo, yo - center cell position
     # Go around the neighbour cells
     # Count the alive ones
 
     aliveSum = 0
-    for x in range(0,2):
-        for y in range(0,2):
-            print (xo + x, yo + y)
+    for x in range(-1,2):
+        for y in range(-1,2):
             aliveSum += array[xo + x][yo + y]
     aliveSum -= array[xo][yo]
     return aliveSum
@@ -33,18 +35,22 @@ def neighbourCellCounter(array, xo, yo):
 def updateGrid(i):
     # Create a new grid system based on the last one
     nextScene = defineArray(row, col)
-    for x in range(row):
-        for y in range(col):
+    global ogScene
+    for x in range(row-1):
+        for y in range(col-1):
             cellState = ogScene[x][y]
             if x == 0 or x == col - 1 or y == 0 or y == row - 1:
                 nextScene[x][y] = cellState
-                break
             else:
                 nSum = neighbourCellCounter(ogScene, x, y)
                 if cellState == 0 and nSum == 3:
                     nextScene[x][y] = 1
                 elif cellState == 1 and (nSum < 2 or nSum > 3):
-                    nextScene[x][y] = ogScene[x][y]
+                    nextScene[x][y] = 0
+                else:
+                    nextScene[x][y] = cellState
+    ogScene = nextScene
+    ax.cla()
     ax.imshow(nextScene)
 
 # Neighbour cells system
@@ -63,7 +69,6 @@ def updateGrid(i):
 
 
 # Elements are referenced [row][column] with starting index 0
-ogScene = defineArray(row, col)
 #plot.imshow(ogScene, interpolation='nearest')
 
 fig, ax = plot.subplots()
@@ -71,5 +76,5 @@ matrice = ax.matshow(ogScene)
 plot.gray()
 
 #
-ani = animation.FuncAnimation(fig, updateGrid, frames=60, interval=50)
+ani = animation.FuncAnimation(fig, updateGrid, frames=60, interval=40)
 plot.show()
