@@ -4,13 +4,15 @@ from random import randrange
 from matplotlib import pyplot as plot
 from matplotlib import animation
 
-width, height = 1280, 720
-dotres = 20
+width, height = 400, 400
+dotres = 10
 
+global col, row
 col = int(width/dotres)
 row = int(height/dotres)
 
 def defineArray(row, col):
+    # Elements are referenced [row][column] with starting index 0
     array = zeros((row, col))
     for x in range(row):
         for y in range(col):
@@ -25,10 +27,15 @@ def neighbourCellCounter(array, xo, yo):
     # Go around the neighbour cells
     # Count the alive ones
 
+    global col, row
     aliveSum = 0
     for x in range(-1,2):
         for y in range(-1,2):
-            aliveSum += array[xo + x][yo + y]
+
+            rows = (xo + x + row) % row
+            cols = (yo + y + col) % col
+
+            aliveSum += array[rows][cols]
     aliveSum -= array[xo][yo]
     return aliveSum
 
@@ -39,16 +46,13 @@ def updateGrid(i):
     for x in range(row-1):
         for y in range(col-1):
             cellState = ogScene[x][y]
-            if x == 0 or x == col - 1 or y == 0 or y == row - 1:
-                nextScene[x][y] = cellState
+            nSum = neighbourCellCounter(ogScene, x, y)
+            if cellState == 0 and nSum == 3:
+                nextScene[x][y] = 1
+            elif cellState == 1 and (nSum < 2 or nSum > 3):
+                nextScene[x][y] = 0
             else:
-                nSum = neighbourCellCounter(ogScene, x, y)
-                if cellState == 0 and nSum == 3:
-                    nextScene[x][y] = 1
-                elif cellState == 1 and (nSum < 2 or nSum > 3):
-                    nextScene[x][y] = 0
-                else:
-                    nextScene[x][y] = cellState
+                nextScene[x][y] = cellState
     ogScene = nextScene
     ax.cla()
     ax.imshow(nextScene)
@@ -65,16 +69,11 @@ def updateGrid(i):
 # 6 -> array[x][y + 1]
 # 7 -> array[x + 1][y - 1]
 # 8 -> array[x + 1][y]
-# 8 -> array[x + 1][y + 1]
-
-
-# Elements are referenced [row][column] with starting index 0
-#plot.imshow(ogScene, interpolation='nearest')
+# 9 -> array[x + 1][y + 1]
 
 fig, ax = plot.subplots()
 matrice = ax.matshow(ogScene)
 plot.gray()
 
-#
-ani = animation.FuncAnimation(fig, updateGrid, frames=60, interval=40)
+ani = animation.FuncAnimation(fig, updateGrid, frames=60, interval=20)
 plot.show()
