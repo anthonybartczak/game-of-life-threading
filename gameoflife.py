@@ -1,5 +1,4 @@
-from threading import Thread, Lock
-from queue import Queue
+from threading import Thread
 from numpy import zeros
 from random import randrange
 from matplotlib import pyplot as plot
@@ -11,8 +10,6 @@ dotres = 10
 global col, row
 col = int(width/dotres)
 row = int(height/dotres)
-
-lock = Lock()
 
 def defineArray(nrow, ncol):
     # Elements are referenced [row][column] with starting index 0
